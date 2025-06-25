@@ -8,8 +8,7 @@ function createRepoRow(repo) {
   nameTd.textContent = repo.name;
 
   const descTd = document.createElement('td');
-  const tags = (repo.topics || []).join(', ');
-  descTd.textContent = (repo.description || '') + (tags ? ` [${tags}]` : '');
+  descTd.textContent = repo.description || '';
 
   const cloneTd = document.createElement('td');
   const iconLink = document.createElement('a');
@@ -53,24 +52,33 @@ async function loadRepos() {
       groups.get(key).push(repo);
     });
 
+    const table = document.createElement('table');
+    table.classList.add('segmented-table');
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Name</th><th>Description</th><th>Link</th><th>Last Updated</th></tr>';
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
     groups.forEach((repoList, topicKey) => {
-      const topicTitle = document.createElement('h3');
-      topicTitle.textContent = topicKey || 'Uncategorized';
-      repoSection.appendChild(topicTitle);
+      const headerRow = document.createElement('tr');
+      const headerCell = document.createElement('td');
+      headerCell.colSpan = 4;
+      headerCell.textContent = topicKey || 'Uncategorized';
+      headerCell.style.fontWeight = 'bold';
+      headerCell.style.background = '#f0f0f0';
+      headerRow.appendChild(headerCell);
+      tbody.appendChild(headerRow);
 
-      const table = document.createElement('table');
-      table.classList.add('segmented-table');
-
-      const thead = document.createElement('thead');
-      thead.innerHTML = '<tr><th>Name</th><th>Description</th><th>Link</th><th>Last Updated</th></tr>';
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      repoList.forEach(repo => tbody.appendChild(createRepoRow(repo)));
-      table.appendChild(tbody);
-
-      repoSection.appendChild(table);
+      repoList.forEach(repo => {
+        const row = createRepoRow(repo);
+        tbody.appendChild(row);
+      });
     });
+
+    table.appendChild(tbody);
+    repoSection.appendChild(table);
 
   } catch (err) {
     console.error(err);
