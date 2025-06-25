@@ -47,7 +47,8 @@ async function loadRepos() {
     const groups = new Map();
 
     repos.forEach(repo => {
-      const key = (repo.topics || []).join(', ') || 'Uncategorized';
+      const sortedTopics = (repo.topics || []).slice().sort();
+      const key = sortedTopics.join(', ') || 'Uncategorized';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(repo);
     });
