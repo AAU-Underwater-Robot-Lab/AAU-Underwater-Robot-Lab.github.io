@@ -49,3 +49,30 @@ h1, h2, h3 {
     color: #666;
     margin-bottom: 0.5rem;
 }
+
+.segmented-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.segmented-table th, .segmented-table td {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+}
+
+.segmented-table th {
+    background-color: #e9eff6;
+    font-weight: bold;
+    color: #003366;
+}
+
+.segmented-table td a {
+    text-decoration: none;
+}
+
+.segmented-table td.small {
+    font-size: 0.85rem;
+    color: #555;
+}
