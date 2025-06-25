@@ -46,7 +46,9 @@ async function loadProjects() {
 
       const filename = normalizeTitleToFilename(title);
       const imgPath = `projects/${filename}`;
-      const descText = item.querySelector('description')?.textContent || '';
+      let descText = item.querySelector('description')?.textContent || '';
+      // Convert relative links to absolute
+      descText = descText.replace(/href="\/en\//g, 'href="https://vbn.aau.dk/en/');
 
       const container = document.createElement('div');
       container.className = 'timeline-item';
