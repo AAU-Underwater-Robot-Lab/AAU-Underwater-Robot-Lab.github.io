@@ -12,10 +12,10 @@ function matchesFilter(text) {
 function normalizeTitleToFilename(title) {
   return title
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[^a-z0-9 ]+/g, '')
+    .normalize('NFKD')                     // Normalize accented characters
+    .replace(/[^a-z0-9 ]+/g, '')           // Remove non-alphanumeric (except space)
     .trim()
-    .replace(/\\s+/g, '_') + '.png';
+    .replace(/\s+/g, '_') + '.png';        // Replace space(s) with underscore
 }
 
 async function loadProjects() {
