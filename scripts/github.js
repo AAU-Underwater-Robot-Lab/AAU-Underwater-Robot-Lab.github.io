@@ -44,20 +44,36 @@ async function loadRepos() {
       return;
     }
 
-    const groups = new Map();
+    // Step 1: Build a canonical topic order
+    const canonicalOrder = [];
+    const topicIndex = {};
 
     repos.forEach(repo => {
-      const sortedTopics = (repo.topics || []).slice().sort();
-      const key = sortedTopics.join(', ') || 'Uncategorized';
+      (repo.topics || []).forEach(topic => {
+        if (!(topic in topicIndex)) {
+          topicIndex[topic] = canonicalOrder.length;
+          canonicalOrder.push(topic);
+        }
+      });
+    });
+
+    // Step 2: Sort topics in each repo based on canonical order
+    const groups = new Map();
+    repos.forEach(repo => {
+      const orderedTopics = (repo.topics || []).slice().sort((a, b) =>
+        topicIndex[a] - topicIndex[b]
+      );
+      const key = orderedTopics.join(', ') || 'Uncategorized';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(repo);
     });
 
-    // Sort group keys
+    // Step 3: Sort group keys according to canonical topic order
     const sortedKeys = Array.from(groups.keys()).sort((a, b) =>
       a.localeCompare(b, undefined, { sensitivity: 'base' })
     );
 
+    // Step 4: Render
     const table = document.createElement('table');
     table.classList.add('segmented-table');
 
