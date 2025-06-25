@@ -1,45 +1,67 @@
-const FEED_URL = 'https://vbn.aau.dk/da/organisations/offshore-drones-and-robotics/projects/?format=rss';
+const FEED_URL = 'https://api.allorigins.win/raw?url=' +
+  encodeURIComponent('https://vbn.aau.dk/da/organisations/offshore-drones-and-robotics/projects/?format=rss');
 
 async function loadProjects() {
-  const listEl = document.getElementById('project-list');
-  listEl.innerHTML = '<li>Indlæser projekter…</li>';
+  const timelineEl = document.getElementById('project-timeline');
+  timelineEl.innerHTML = '<p>Loading projects…</p>';
 
   try {
     const response = await fetch(FEED_URL);
-    if (!response.ok) throw new Error('Netværksfejl ' + response.status);
+    if (!response.ok) throw new Error('Network error ' + response.status);
     const text = await response.text();
     const xml = new DOMParser().parseFromString(text, 'application/xml');
     const items = Array.from(xml.querySelectorAll('item'));
     if (items.length === 0) {
-      listEl.innerHTML = '<li>Ingen projekter fundet.</li>';
+      timelineEl.innerHTML = '<p>No projects found.</p>';
       return;
     }
 
-    listEl.innerHTML = '';
-    items.forEach(item => {
-      const title = item.querySelector('title')?.textContent || 'Uden titel';
+    timelineEl.innerHTML = '';
+    items.forEach((item, idx) => {
+      const title = item.querySelector('title')?.textContent || 'Untitled';
       const link = item.querySelector('link')?.textContent || '#';
       const date = item.querySelector('pubDate')?.textContent;
-      const dateStr = date ? new Date(date).toLocaleDateString('da-DK') : '';
+      const desc = item.querySelector('description')?.textContent || '';
+      const dateStr = date ? new Date(date).getFullYear() : 'Unknown Year';
 
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = link;
-      a.textContent = title;
-      a.target = '_blank';
-      li.appendChild(a);
+      const container = document.createElement('div');
+      container.className = 'timeline-item';
+      if (idx % 2 === 1) container.style.flexDirection = 'row-reverse';
 
-      if (dateStr) {
-        const span = document.createElement('span');
-        span.className = 'pubDate';
-        span.textContent = ' (' + dateStr + ')';
-        li.appendChild(span);
-      }
-      listEl.appendChild(li);
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'timeline-img';
+      const img = document.createElement('img');
+      img.src = 'assets/project_placeholder.png';
+      img.style.width = '256px';
+      img.style.height = '256px';
+      imgDiv.appendChild(img);
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'timeline-content';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'timeline-title';
+      titleEl.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
+
+      const meta1 = document.createElement('div');
+      meta1.className = 'timeline-meta';
+      meta1.textContent = 'Type: Research Project';
+
+      const meta2 = document.createElement('div');
+      meta2.className = 'timeline-meta';
+      meta2.textContent = `Period: ${dateStr}`;
+
+      const p = document.createElement('p');
+      p.textContent = desc;
+
+      [titleEl, meta1, meta2, p].forEach(el => contentDiv.appendChild(el));
+      container.appendChild(imgDiv);
+      container.appendChild(contentDiv);
+      timelineEl.appendChild(container);
     });
   } catch (err) {
     console.error(err);
-    listEl.innerHTML = '<li>Kunne ikke hente RSS‑feed: ' + err.message + '</li>';
+    timelineEl.innerHTML = '<p>Could not load project feed: ' + err.message + '</p>';
   }
 }
 
