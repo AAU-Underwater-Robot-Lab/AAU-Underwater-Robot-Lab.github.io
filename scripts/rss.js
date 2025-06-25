@@ -1,4 +1,4 @@
-const FEED_URL = 'https://corsproxy.io/?url=https%3A//vbn.aau.dk/en/organisations/underwater-technology/projects/%3Fformat%3Drss'
+const FEED_URL = 'https://corsproxy.io/?url=https%3A//vbn.aau.dk/en/organisations/esbjerg-energy-section/projects/%3Fformat%3Drss'
 
 async function loadProjects() {
   const timelineEl = document.getElementById('project-timeline');
