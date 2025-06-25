@@ -8,7 +8,8 @@ function createRepoRow(repo) {
   nameTd.textContent = repo.name;
 
   const descTd = document.createElement('td');
-  descTd.textContent = repo.description || '';
+  const tags = (repo.topics || []).join(', ');
+  descTd.textContent = (repo.description || '') + (tags ? ` [${tags}]` : '');
 
   const cloneTd = document.createElement('td');
   const iconLink = document.createElement('a');
