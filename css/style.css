@@ -90,7 +90,9 @@ h1, h2, h3 {
 .capabilities-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-rows: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
 }
 .capabilities-grid > .card-research {
   grid-row: 1;
@@ -112,6 +114,10 @@ h1, h2, h3 {
 }
 .capabilities-grid > div {
   min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
 }
 
 .rendering, .rendering_upmproject, .rendering_short, .rendering_upmproject_short {
