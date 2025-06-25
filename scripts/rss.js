@@ -1,5 +1,4 @@
-const FEED_URL = 'https://api.allorigins.win/raw?url=' +
-  encodeURIComponent('https://vbn.aau.dk/da/organisations/offshore-drones-and-robotics/projects/?format=rss');
+const FEED_URL = 'https://corsproxy.io/?url=https%3A//vbn.aau.dk/en/organisations/underwater-technology/projects/%3Fformat%3Drss'
 
 async function loadProjects() {
   const timelineEl = document.getElementById('project-timeline');
