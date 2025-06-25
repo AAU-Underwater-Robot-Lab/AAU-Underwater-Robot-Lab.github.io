@@ -1,7 +1,7 @@
 const FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/esbjerg-energy-section/projects/?format=rss');
 
 // Keywords to filter by (case-insensitive)
-const FILTER_WORDS = ['underwater', 'robot', 'undervands', 'ACOMAR'];
+const FILTER_WORDS = ['underwater', 'undervands','ACOMAR','AUV','ROV'];
 
 function matchesFilter(text) {
   if (!text) return false;
