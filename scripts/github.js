@@ -1,6 +1,20 @@
 const ORG = 'AAU-Underwater-Robot-Lab';
 const API_URL = `https://api.github.com/orgs/${ORG}/repos?per_page=100`;
 
+const FALLBACK_PATH = 'assets/repos_fallback.json';
+
+async function fetchWithFallback(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('GitHub API error: ' + response.status);
+    return await response.json();
+  } catch (err) {
+    console.warn('Primary fetch failed, loading fallback JSON:', err.message);
+    const fallback = await fetch(FALLBACK_PATH);
+    return await fallback.json();
+  }
+}
+
 function createRepoRow(repo) {
   const row = document.createElement('tr');
 
@@ -33,12 +47,7 @@ async function loadRepos() {
   if (originalTable) originalTable.remove();
 
   try {
-    const resp = await fetch(API_URL, {
-      headers: { 'Accept': 'application/vnd.github+json' }
-    });
-    if (!resp.ok) throw new Error(resp.status + ' ' + resp.statusText);
-    const repos = await resp.json();
-
+    const repos = await fetchWithFallback(API_URL);
     if (!Array.isArray(repos) || repos.length === 0) {
       repoSection.innerHTML += '<p>No repositories found.</p>';
       return;
