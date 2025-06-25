@@ -53,6 +53,11 @@ async function loadRepos() {
       groups.get(key).push(repo);
     });
 
+    // Sort group keys
+    const sortedKeys = Array.from(groups.keys()).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    );
+
     const table = document.createElement('table');
     table.classList.add('segmented-table');
 
@@ -62,7 +67,8 @@ async function loadRepos() {
 
     const tbody = document.createElement('tbody');
 
-    groups.forEach((repoList, topicKey) => {
+    sortedKeys.forEach(topicKey => {
+      const repoList = groups.get(topicKey);
       const headerRow = document.createElement('tr');
       const headerCell = document.createElement('td');
       headerCell.colSpan = 4;
