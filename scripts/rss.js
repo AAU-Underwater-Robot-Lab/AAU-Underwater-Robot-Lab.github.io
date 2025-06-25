@@ -54,7 +54,7 @@ async function loadProjects() {
 
       container.innerHTML = `
         <div class="timeline-img">
-          <img src="${imgPath}" width="256" height="256" alt="">
+          <img src="${imgPath}" width="342" height="256" alt="">
         </div>
         <div class="timeline-content">
             <p>${descText}</p>
