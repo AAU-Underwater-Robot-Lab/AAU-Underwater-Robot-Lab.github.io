@@ -32,12 +32,12 @@ function createRepoRow(repo) {
   iconLink.target = '_blank';
   cloneTd.appendChild(iconLink);
 
-  const dateTd = document.createElement('td');
-  dateTd.textContent = new Date(repo.updated_at)
-    .toLocaleString('default', { dateStyle: 'short', timeStyle: 'short' });
-  dateTd.className = 'small';
+  //const dateTd = document.createElement('td');
+  //dateTd.textContent = new Date(repo.updated_at)
+  //  .toLocaleString('default', { dateStyle: 'short', timeStyle: 'short' });
+  //dateTd.className = 'small';
 
-  [nameTd, descTd, cloneTd, dateTd].forEach(td => row.appendChild(td));
+  [nameTd, descTd, cloneTd].forEach(td => row.appendChild(td));
   return row;
 }
 
@@ -87,7 +87,7 @@ async function loadRepos() {
     table.classList.add('segmented-table');
 
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th>Name</th><th>Description</th><th>Link</th><th>Last Updated</th></tr>';
+    thead.innerHTML = '<tr><th>Name</th><th>Description</th><th>Link</th></tr>';
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
