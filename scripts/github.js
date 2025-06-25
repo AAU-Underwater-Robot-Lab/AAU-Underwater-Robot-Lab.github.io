@@ -53,34 +53,36 @@ async function loadRepos() {
       return;
     }
 
-    // Step 1: Build a canonical topic order
-    const canonicalOrder = [];
-    const topicIndex = {};
-
+    // Step 1: Count topic frequencies
+    const topicFreq = {};
     repos.forEach(repo => {
       (repo.topics || []).forEach(topic => {
-        if (!(topic in topicIndex)) {
-          topicIndex[topic] = canonicalOrder.length;
-          canonicalOrder.push(topic);
-        }
+        topicFreq[topic] = (topicFreq[topic] || 0) + 1;
       });
     });
 
-    // Step 2: Sort topics in each repo based on canonical order
+    // Step 2: Sort topics in each repo by frequency (most common first)
     const groups = new Map();
     repos.forEach(repo => {
-      const orderedTopics = (repo.topics || []).slice().sort((a, b) =>
-        topicIndex[a] - topicIndex[b]
-      );
+      const orderedTopics = (repo.topics || []).slice().sort((a, b) => {
+        // Sort by frequency (desc), then alphabetically
+        if (topicFreq[b] !== topicFreq[a]) return topicFreq[b] - topicFreq[a];
+        return a.localeCompare(b);
+      });
       const key = orderedTopics.join(', ') || 'Uncategorized';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(repo);
     });
 
-    // Step 3: Sort group keys according to canonical topic order
-    const sortedKeys = Array.from(groups.keys()).sort((a, b) =>
-      a.localeCompare(b, undefined, { sensitivity: 'base' })
-    );
+    // Step 3: Sort group keys by the frequency of their first topic (most common first)
+    const sortedKeys = Array.from(groups.keys()).sort((a, b) => {
+      const aFirst = a.split(', ')[0] || '';
+      const bFirst = b.split(', ')[0] || '';
+      const freqA = topicFreq[aFirst] || 0;
+      const freqB = topicFreq[bFirst] || 0;
+      if (freqB !== freqA) return freqB - freqA;
+      return a.localeCompare(b);
+    });
 
     // Step 4: Render
     const table = document.createElement('table');
