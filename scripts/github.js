@@ -45,19 +45,17 @@ async function loadRepos() {
       return;
     }
 
-    const topicsMap = new Map();
+    const groups = new Map();
 
     repos.forEach(repo => {
-      const topics = repo.topics && repo.topics.length ? repo.topics : ['Uncategorized'];
-      topics.forEach(topic => {
-        if (!topicsMap.has(topic)) topicsMap.set(topic, []);
-        topicsMap.get(topic).push(repo);
-      });
+      const key = (repo.topics || []).join(', ') || 'Uncategorized';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(repo);
     });
 
-    topicsMap.forEach((repoList, topic) => {
+    groups.forEach((repoList, topicKey) => {
       const topicTitle = document.createElement('h3');
-      topicTitle.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
+      topicTitle.textContent = topicKey || 'Uncategorized';
       repoSection.appendChild(topicTitle);
 
       const table = document.createElement('table');
