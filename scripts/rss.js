@@ -9,6 +9,15 @@ function matchesFilter(text) {
   return FILTER_WORDS.some(w => lower.includes(w));
 }
 
+function normalizeTitleToFilename(title) {
+  return title
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9 ]+/g, '')
+    .trim()
+    .replace(/\\s+/g, '_') + '.png';
+}
+
 async function loadProjects() {
   const timelineEl = document.getElementById('project-timeline');
   timelineEl.innerHTML = '<p>Loading projects…</p>';
@@ -34,6 +43,9 @@ async function loadProjects() {
       const link = item.querySelector('link')?.textContent || '#';
       const date = item.querySelector('pubDate')?.textContent;
       const dateStr = date ? new Date(date).getFullYear() : 'Year unknown';
+
+      const filename = normalizeTitleToFilename(title);
+      const imgPath = `projects/${filename}`;
       const descText = item.querySelector('description')?.textContent || '';
 
       const container = document.createElement('div');
@@ -42,14 +54,10 @@ async function loadProjects() {
 
       container.innerHTML = `
         <div class="timeline-img">
-          <img src="assets/project_placeholder.png" width="256" height="256" alt="">
+          <img src="${imgPath}" width="256" height="256" alt="">
         </div>
         <div class="timeline-content">
-          <div class="timeline-title">
-            <a href="${link}" target="_blank">${title}</a>
-          </div>
-          <div class="timeline-meta">Year: ${dateStr}</div>
-          <p>${descText}</p>
+            <p>${descText}</p>
         </div>
       `;
       timelineEl.appendChild(container);
