@@ -51,5 +51,4 @@ async function loadRepos() {
   }
 }
 
-document.getElementById('refresh').addEventListener('click', loadRepos);
 window.addEventListener('DOMContentLoaded', loadRepos);
