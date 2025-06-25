@@ -1,7 +1,10 @@
 #logo { height: 80px; }
 header { text-align: center; margin-bottom: 2rem; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1rem; }
-.card { padding: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+
+.card-research { padding: 1rem; border: 1px solid #ccc; border-radius: 4px; background-color: cornflowerblue; }
+.card-lab { padding: 1rem; border: 1px solid #ccc; border-radius: 4px; background-color:lightgreen; }
+
 footer { text-align: center; margin: 2rem 0; color: #555; font-size: 0.9rem; }
 ul { list-style: disc; padding-left: 1.2rem; }
 
