@@ -1,13 +1,5 @@
 const PERSONNEL_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/blue-marine-maritime-research/persons/?format=rss');
 
-// Keywords to filter by (case-insensitive)
-const FILTER_WORDS = ['underwater', 'undervands','ACOMAR','AUV','ROV','eelgrass','acomar'];
-
-function matchesFilter(text) {
-  if (!text) return false;
-  const lower = text.toLowerCase();
-  return FILTER_WORDS.some(w => lower.includes(w));
-}
 
 function normalizeTitleToFilename(title) {
   return title
@@ -16,21 +8,6 @@ function normalizeTitleToFilename(title) {
     .replace(/[^a-z0-9 ]+/g, '')           // Remove non-alphanumeric (except space)
     .trim()
     .replace(/\s+/g, '_') + '.png';        // Replace space(s) with underscore
-}
-
-async function fetchProjects() {
-  // Fetch and parse the projects feed from rss.js
-  const PROJECTS_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/multimodal-reasoning-for-robotics-and-process-intelligence/projects/?format=rss');
-  try {
-    const resp = await fetch(PROJECTS_FEED_URL);
-    if (!resp.ok) throw new Error('Network error ' + resp.status);
-    const text = await resp.text();
-    const xml = new DOMParser().parseFromString(text, 'application/xml');
-    return Array.from(xml.querySelectorAll('item'));
-  } catch (err) {
-    console.error('Could not load projects feed:', err);
-    return [];
-  }
 }
 
 async function getProjectTexts() {

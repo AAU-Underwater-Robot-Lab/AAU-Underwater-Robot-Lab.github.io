@@ -35,6 +35,14 @@ async function loadProjects() {
       return matchesFilter(title) || matchesFilter(desc);
     });
 
+    // Save filtered project items for use in other scripts
+    window.loadedProjectItems = filtered.map(item => ({
+      title: item.querySelector('title')?.textContent || '',
+      description: item.querySelector('description')?.textContent || '',
+      link: item.querySelector('link')?.textContent || '',
+      pubDate: item.querySelector('pubDate')?.textContent || ''
+    }));
+
     timelineEl.innerHTML = filtered.length ?
       '' : '<p>No matching projects found.</p>';
 
