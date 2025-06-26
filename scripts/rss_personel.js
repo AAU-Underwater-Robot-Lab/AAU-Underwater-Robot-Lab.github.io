@@ -57,16 +57,16 @@ async function fetchPersonPhoto(personUrl) {
       if (picture) {
         // Try to find the first <img> inside <picture>
         const img = picture.querySelector('img');
-        if (img && img.src) {
-          let src = img.src;
-          if (src.startsWith('/')) src = 'https://vbn.aau.dk' + src;
+        if (img && img.getAttribute('src')) {
+          let src = img.getAttribute('src');
+          if (src && !src.startsWith('http')) src = 'https://vbn.aau.dk' + src;
           return src;
         }
         // Or try <source srcset>
         const source = picture.querySelector('source');
-        if (source && source.srcset) {
-          let src = source.srcset.split(',')[0].trim().split(' ')[0];
-          if (src.startsWith('/')) src = 'https://vbn.aau.dk' + src;
+        if (source && source.getAttribute('srcset')) {
+          let src = source.getAttribute('srcset').split(',')[0].trim().split(' ')[0];
+          if (src && !src.startsWith('http')) src = 'https://vbn.aau.dk' + src;
           return src;
         }
       }
