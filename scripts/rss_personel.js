@@ -90,7 +90,14 @@ function parsePersonnelItem(item) {
     // Email (try to get the visible part, not the obfuscated script)
     const emailA = descDoc.querySelector('ul.relations.email a.email');
     if (emailA) {
-      email = emailA.textContent.replace(/\s+/g, '').replace(/\n/g, '').replace(/\[at\]|\[dot\]/g, '@').trim();
+      // Replace encryptedA() and encryptedDot() with @ and .
+      let raw = emailA.innerHTML
+        .replace(/<script>encryptedA\(\);<\/script>/g, '@')
+        .replace(/<script>encryptedDot\(\);<\/script>/g, '.')
+        .replace(/<[^>]+>/g, '') // Remove any other tags
+        .replace(/\s+/g, '')
+        .replace(/\n/g, '');
+      email = raw;
     }
     // Role
     role = descDoc.querySelector('p.type')?.textContent?.replace(/Person: /, '').trim() || '';
@@ -146,8 +153,11 @@ async function loadProjects() {
         // Try to get the photo from the personnel profile page
         let photoUrl = await fetchPersonPhoto(person.link);
         if (!photoUrl) photoUrl = imgPath;
-        const card = document.createElement('div');
+        const card = document.createElement('a');
         card.className = 'team-card';
+        card.href = person.link;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
         card.innerHTML = `
           <div class="team-card-img">
             <img src="${photoUrl}" width="120" height="120" alt="">
@@ -156,7 +166,7 @@ async function loadProjects() {
             <h4>${person.heading || person.title}</h4>
             <div class="team-card-desc">
               ${person.role ? `<div class='team-role'>${person.role}</div>` : ''}
-              ${person.email ? `<div class='team-email'>${person.email}</div>` : ''}
+              ${person.email ? `<div class='team-email'><a href='mailto:${person.email}' onclick='event.stopPropagation();'>${person.email}</a></div>` : ''}
             </div>
           </div>
         `;
