@@ -1,4 +1,4 @@
-const FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/blue-marine-maritime-research/persons/?format=rss');
+const PERSONNEL_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/blue-marine-maritime-research/persons/?format=rss');
 
 // Keywords to filter by (case-insensitive)
 const FILTER_WORDS = ['underwater', 'undervands','ACOMAR','AUV','ROV','eelgrass','acomar'];
@@ -58,7 +58,7 @@ async function loadProjects() {
 
   try {
     // Fetch personnel feed
-    const resp = await fetch(FEED_URL);
+    const resp = await fetch(PERSONNEL_FEED_URL);
     if (!resp.ok) throw new Error('Network error ' + resp.status);
     const text = await resp.text();
     const xml = new DOMParser().parseFromString(text, 'application/xml');
