@@ -167,7 +167,7 @@ h1, h2, h3 {
 .team-card-img {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
+  border-radius: 25%;
   overflow: hidden;
   margin-bottom: 0.7rem;
   background: #e6e6e6;
@@ -178,7 +178,7 @@ h1, h2, h3 {
 .team-card-img img {
   height: 100%;
   width: auto;
-  border-radius: 50%;
+  border-radius: 25%;
   display: block;
   margin: 0 auto;
 }
