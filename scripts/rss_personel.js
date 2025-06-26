@@ -131,6 +131,20 @@ async function loadProjects() {
     // Get all /en/persons/ links from project descriptions
     const projectPersonLinks = await getProjectPersonLinks();
 
+    // Build a map of person link to project count
+    const personProjectCount = {};
+    if (window.loadedProjectItems && Array.isArray(window.loadedProjectItems)) {
+      for (const project of window.loadedProjectItems) {
+        if (project.participants && Array.isArray(project.participants)) {
+          for (const p of project.participants) {
+            if (p.href && p.href.startsWith('/en/persons/')) {
+              personProjectCount[p.href] = (personProjectCount[p.href] || 0) + 1;
+            }
+          }
+        }
+      }
+    }
+
     // Only matched team members: link must match a /en/persons/ link in any project description
     const team = items.filter(item => {
       const personLink = item.querySelector('link')?.textContent || '';
@@ -138,6 +152,15 @@ async function loadProjects() {
       const match = personLink.match(/\/en\/persons\/[^/]+/);
       if (!match) return false;
       return projectPersonLinks.has(match[0]);
+    });
+
+    // Sort by number of projects (descending)
+    team.sort((a, b) => {
+      const aLink = a.querySelector('link')?.textContent.match(/\/en\/persons\/[^/]+/);
+      const bLink = b.querySelector('link')?.textContent.match(/\/en\/persons\/[^/]+/);
+      const aCount = aLink ? (personProjectCount[aLink[0]] || 0) : 0;
+      const bCount = bLink ? (personProjectCount[bLink[0]] || 0) : 0;
+      return bCount - aCount;
     });
 
     // Render team section only
@@ -153,6 +176,10 @@ async function loadProjects() {
         // Try to get the photo from the personnel profile page
         let photoUrl = await fetchPersonPhoto(person.link);
         if (!photoUrl) photoUrl = imgPath;
+        // Get project count
+        const personLink = person.link.match(/\/en\/persons\/[^/]+/);
+        const projectCount = personLink ? (personProjectCount[personLink[0]] || 0) : 0;
+        const isFormer = projectCount === 0;
         const card = document.createElement('a');
         card.className = 'team-card';
         card.href = person.link;
@@ -167,6 +194,7 @@ async function loadProjects() {
             <div class="team-card-desc">
               ${person.role ? `<div class='team-role'>${person.role}</div>` : ''}
               ${person.email ? `<div class='team-email'><a href='mailto:${person.email}' onclick='event.stopPropagation();'>${person.email}</a></div>` : ''}
+              ${isFormer ? `<div class='team-former'>Former</div>` : ''}
             </div>
           </div>
         `;
