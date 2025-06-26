@@ -105,6 +105,8 @@ async function loadProjects() {
     // Render team section only
     if (teamEl) {
       teamEl.innerHTML = team.length ? '' : '<p>No team members found.</p>';
+      const grid = document.createElement('div');
+      grid.className = 'team-grid';
       for (let idx = 0; idx < team.length; idx++) {
         const item = team[idx];
         const title = item.querySelector('title')?.textContent || 'Untitled';
@@ -116,20 +118,20 @@ async function loadProjects() {
         const personLink = item.querySelector('link')?.textContent || '';
         let photoUrl = await fetchPersonPhoto(personLink);
         if (!photoUrl) photoUrl = imgPath;
-        const container = document.createElement('div');
-        container.className = 'timeline-item';
-        if (idx % 2 === 1) container.style.flexDirection = 'row-reverse';
-        container.innerHTML = `
-          <div class="timeline-img">
-            <img src="${photoUrl}" width="342" height="256" alt="">
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        card.innerHTML = `
+          <div class="team-card-img">
+            <img src="${photoUrl}" width="120" height="120" alt="">
           </div>
-          <div class="timeline-content">
-              <p>${descText}</p>
-              <p><strong>Project association:</strong> Yes</p>
+          <div class="team-card-content">
+            <h4>${title}</h4>
+            <div class="team-card-desc">${descText}</div>
           </div>
         `;
-        teamEl.appendChild(container);
+        grid.appendChild(card);
       }
+      teamEl.appendChild(grid);
     }
   } catch (err) {
     console.error(err);
