@@ -42,6 +42,37 @@ async function getProjectPersonLinks() {
   }
 }
 
+async function fetchPersonPhoto(personUrl) {
+  try {
+    // Use corsproxy.io to avoid CORS issues
+    const resp = await fetch('https://corsproxy.io/?url=' + encodeURIComponent(personUrl));
+    if (!resp.ok) throw new Error('Network error ' + resp.status);
+    const html = await resp.text();
+    // Parse the HTML and look for a <section class="profile">
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const profileSection = doc.querySelector('section.profile');
+    if (profileSection) {
+      const picture = profileSection.querySelector('picture');
+      if (picture) {
+        // Try to find the first <img> inside <picture>
+        const img = picture.querySelector('img');
+        if (img && img.src) {
+          return img.src;
+        }
+        // Or try <source srcset>
+        const source = picture.querySelector('source');
+        if (source && source.srcset) {
+          return source.srcset.split(',')[0].trim().split(' ')[0];
+        }
+      }
+    }
+  } catch (err) {
+    // Ignore errors, fallback to default
+  }
+  return null;
+}
+
 async function loadProjects() {
   // Only update the team section for matched personnel
   const teamEl = document.getElementById('team');
@@ -70,18 +101,23 @@ async function loadProjects() {
     // Render team section only
     if (teamEl) {
       teamEl.innerHTML = team.length ? '' : '<p>No team members found.</p>';
-      team.forEach((item, idx) => {
+      for (let idx = 0; idx < team.length; idx++) {
+        const item = team[idx];
         const title = item.querySelector('title')?.textContent || 'Untitled';
         const filename = normalizeTitleToFilename(title);
-        const imgPath = `projects/${filename}`;
+        let imgPath = `projects/${filename}`;
         let descText = item.querySelector('description')?.textContent || '';
         descText = descText.replace(/href="\/en\//g, 'href="https://vbn.aau.dk/en/');
+        // Try to get the photo from the personnel profile page
+        const personLink = item.querySelector('link')?.textContent || '';
+        let photoUrl = await fetchPersonPhoto(personLink);
+        if (!photoUrl) photoUrl = imgPath;
         const container = document.createElement('div');
         container.className = 'timeline-item';
         if (idx % 2 === 1) container.style.flexDirection = 'row-reverse';
         container.innerHTML = `
           <div class="timeline-img">
-            <img src="${imgPath}" width="342" height="256" alt="">
+            <img src="${photoUrl}" width="342" height="256" alt="">
           </div>
           <div class="timeline-content">
               <p>${descText}</p>
@@ -89,7 +125,7 @@ async function loadProjects() {
           </div>
         `;
         teamEl.appendChild(container);
-      });
+      }
     }
   } catch (err) {
     console.error(err);
