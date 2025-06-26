@@ -77,6 +77,37 @@ async function fetchPersonPhoto(personUrl) {
   return null;
 }
 
+function parsePersonnelItem(item) {
+  const title = item.querySelector('title')?.textContent || '';
+  const link = item.querySelector('link')?.textContent || '';
+  const description = item.querySelector('description')?.textContent || '';
+  let heading = '', email = '', role = '', organizations = [];
+  if (description) {
+    const parser = new DOMParser();
+    const descDoc = parser.parseFromString(description, 'text/html');
+    // Heading
+    heading = descDoc.querySelector('h3.title')?.textContent?.trim() || '';
+    // Email (try to get the visible part, not the obfuscated script)
+    const emailA = descDoc.querySelector('ul.relations.email a.email');
+    if (emailA) {
+      email = emailA.textContent.replace(/\s+/g, '').replace(/\n/g, '').replace(/\[at\]|\[dot\]/g, '@').trim();
+    }
+    // Role
+    role = descDoc.querySelector('p.type')?.textContent?.replace(/Person: /, '').trim() || '';
+    // Organizations
+    organizations = Array.from(descDoc.querySelectorAll('ul.relations.organisations li')).map(li => li.textContent.trim()).filter(Boolean);
+  }
+  return {
+    title,
+    link,
+    description,
+    heading,
+    email,
+    role,
+    organizations
+  };
+}
+
 async function loadProjects() {
   // Only update the team section for matched personnel
   const teamEl = document.getElementById('team');
@@ -109,14 +140,11 @@ async function loadProjects() {
       grid.className = 'team-grid';
       for (let idx = 0; idx < team.length; idx++) {
         const item = team[idx];
-        const title = item.querySelector('title')?.textContent || 'Untitled';
-        const filename = normalizeTitleToFilename(title);
+        const person = parsePersonnelItem(item);
+        const filename = normalizeTitleToFilename(person.title);
         let imgPath = `projects/${filename}`;
-        let descText = item.querySelector('description')?.textContent || '';
-        descText = descText.replace(/href="\/en\//g, 'href="https://vbn.aau.dk/en/');
         // Try to get the photo from the personnel profile page
-        const personLink = item.querySelector('link')?.textContent || '';
-        let photoUrl = await fetchPersonPhoto(personLink);
+        let photoUrl = await fetchPersonPhoto(person.link);
         if (!photoUrl) photoUrl = imgPath;
         const card = document.createElement('div');
         card.className = 'team-card';
@@ -125,8 +153,11 @@ async function loadProjects() {
             <img src="${photoUrl}" width="120" height="120" alt="">
           </div>
           <div class="team-card-content">
-            <h4>${title}</h4>
-            <div class="team-card-desc">${descText}</div>
+            <h4>${person.heading || person.title}</h4>
+            <div class="team-card-desc">
+              ${person.role ? `<div class='team-role'>${person.role}</div>` : ''}
+              ${person.email ? `<div class='team-email'>${person.email}</div>` : ''}
+            </div>
           </div>
         `;
         grid.appendChild(card);
