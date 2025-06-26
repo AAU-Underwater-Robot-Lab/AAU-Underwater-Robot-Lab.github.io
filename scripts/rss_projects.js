@@ -18,6 +18,53 @@ function normalizeTitleToFilename(title) {
     .replace(/\s+/g, '_') + '.png';        // Replace space(s) with underscore
 }
 
+function parseProjectDescription(descriptionHTML) {
+  const doc = new DOMParser().parseFromString(descriptionHTML, 'text/html');
+  const root = doc.body.firstElementChild;
+  if (!root) return {};
+
+  // Title
+  const title = root.querySelector('.title span')?.textContent?.trim() || '';
+
+  // Participants
+  const participants = [];
+  const peopleP = root.querySelector('p:not(.period):not(.type)');
+  if (peopleP) {
+    peopleP.querySelectorAll('a.person').forEach(a => {
+      const name = a.textContent.trim();
+      const href = a.getAttribute('href');
+      // Role is the text node after the <a>
+      let role = '';
+      let node = a.nextSibling;
+      while (node && node.nodeType === Node.TEXT_NODE && !role) {
+        const match = node.textContent.match(/\(([^)]+)\)/);
+        if (match) role = match[1].trim();
+        node = node.nextSibling;
+      }
+      participants.push({ name, href, role });
+    });
+  }
+
+  // Dates
+  const periodP = root.querySelector('p.period');
+  const dates = periodP ? Array.from(periodP.querySelectorAll('.date')).map(e => e.textContent.trim()) : [];
+  const [startDate, endDate] = dates;
+
+  // Type
+  const typeP = root.querySelector('p.type');
+  const typeFamily = typeP?.querySelector('.type_family')?.textContent.replace(/:$/, '').trim() || '';
+  const typeClassification = typeP?.querySelector('.type_classification')?.textContent.trim() || '';
+
+  return {
+    parsedTitle: title,
+    participants,
+    startDate,
+    endDate,
+    typeFamily,
+    typeClassification
+  };
+}
+
 async function loadProjects() {
   const timelineEl = document.getElementById('project-timeline');
   timelineEl.innerHTML = '<p>Loading projects…</p>';
@@ -35,16 +82,20 @@ async function loadProjects() {
       return matchesFilter(title) || matchesFilter(desc);
     });
 
-    // Save filtered project items for use in other scripts
-    window.loadedProjectItems = filtered.map(item => ({
-      title: item.querySelector('title')?.textContent || '',
-      description: item.querySelector('description')?.textContent || '',
-      link: item.querySelector('link')?.textContent || '',
-      pubDate: item.querySelector('pubDate')?.textContent || ''
-    }));
+    // Save filtered project items for use in other scripts, with parsed description
+    window.loadedProjectItems = filtered.map(item => {
+      const description = item.querySelector('description')?.textContent || '';
+      const parsed = parseProjectDescription(description);
+      return {
+        title: item.querySelector('title')?.textContent || '',
+        description,
+        link: item.querySelector('link')?.textContent || '',
+        pubDate: item.querySelector('pubDate')?.textContent || '',
+        ...parsed
+      };
+    });
 
-    timelineEl.innerHTML = filtered.length ?
-      '' : '<p>No matching projects found.</p>';
+    timelineEl.innerHTML = filtered.length ? '' : '<p>No matching projects found.</p>';
 
     filtered.forEach((item, idx) => {
       const title = item.querySelector('title')?.textContent || 'Untitled';
