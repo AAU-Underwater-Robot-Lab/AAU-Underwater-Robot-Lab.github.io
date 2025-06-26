@@ -1,6 +1,5 @@
 const PERSONNEL_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/blue-marine-maritime-research/persons/?format=rss');
 
-
 function normalizeTitleToFilename(title) {
   return title
     .toLowerCase()
@@ -10,22 +9,37 @@ function normalizeTitleToFilename(title) {
     .replace(/\s+/g, '_') + '.png';        // Replace space(s) with underscore
 }
 
-async function getProjectTexts() {
-  // Try to reuse loaded projects from rss.js if available
+function extractPersonLinksFromProjects(projectDescriptions) {
+  // Extract all /en/persons/ links from all project descriptions
+  const personLinks = new Set();
+  const regex = /href=\"(\/en\/persons\/[^\"]+)/g;
+  for (const desc of projectDescriptions) {
+    let match;
+    while ((match = regex.exec(desc)) !== null) {
+      personLinks.add(match[1]);
+    }
+  }
+  return personLinks;
+}
+
+async function getProjectPersonLinks() {
   if (window.loadedProjectItems && Array.isArray(window.loadedProjectItems)) {
-    return window.loadedProjectItems.map(item => {
-      const title = item.title || '';
-      const desc = item.description || '';
-      return (title + ' ' + desc).toLowerCase();
-    });
+    const descriptions = window.loadedProjectItems.map(item => item.description || '');
+    return extractPersonLinksFromProjects(descriptions);
   }
   // Fallback: fetch projects feed directly
-  const projectItems = await fetchProjects();
-  return projectItems.map(item => {
-    const title = item.querySelector('title')?.textContent || '';
-    const desc = item.querySelector('description')?.textContent || '';
-    return (title + ' ' + desc).toLowerCase();
-  });
+  const PROJECTS_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/multimodal-reasoning-for-robotics-and-process-intelligence/projects/?format=rss');
+  try {
+    const resp = await fetch(PROJECTS_FEED_URL);
+    if (!resp.ok) throw new Error('Network error ' + resp.status);
+    const text = await resp.text();
+    const xml = new DOMParser().parseFromString(text, 'application/xml');
+    const projectItems = Array.from(xml.querySelectorAll('item'));
+    const descriptions = projectItems.map(item => item.querySelector('description')?.textContent || '');
+    return extractPersonLinksFromProjects(descriptions);
+  } catch {
+    return new Set();
+  }
 }
 
 async function loadProjects() {
@@ -41,20 +55,16 @@ async function loadProjects() {
     const xml = new DOMParser().parseFromString(text, 'application/xml');
     const items = Array.from(xml.querySelectorAll('item'));
 
-    // Get project texts from rss.js or fetch if not available
-    const projectTexts = await getProjectTexts();
+    // Get all /en/persons/ links from project descriptions
+    const projectPersonLinks = await getProjectPersonLinks();
 
-    const filtered = items.filter(item => {
-      const title = item.querySelector('title')?.textContent;
-      const desc = item.querySelector('description')?.textContent;
-      return matchesFilter(title) || matchesFilter(desc);
-    });
-
-    // Only matched team members
-    const team = filtered.filter(item => {
-      const title = item.querySelector('title')?.textContent || 'Untitled';
-      const personName = title.toLowerCase();
-      return projectTexts.some(text => text.includes(personName));
+    // Only matched team members: link must match a /en/persons/ link in any project description
+    const team = items.filter(item => {
+      const personLink = item.querySelector('link')?.textContent || '';
+      // Extract the /en/persons/... part from the link
+      const match = personLink.match(/\/en\/persons\/[^/]+/);
+      if (!match) return false;
+      return projectPersonLinks.has(match[0]);
     });
 
     // Render team section only
