@@ -146,13 +146,7 @@ async function loadProjects() {
     } 
 
     // Only matched team members: link must match a /en/persons/ link in any project description
-    /* const team = items.filter(item => {
-      const personLink = item.querySelector('link')?.textContent || '';
-      // Extract the /en/persons/... part from the link
-      const match = personLink.match(/\/en\/persons\/[^/]+/);
-      if (!match) return false;
-      return projectPersonLinks.has(match[0]);
-    }); */
+    const team = items;
 
     // Sort by number of projects (descending)
     team.sort((a, b) => {
