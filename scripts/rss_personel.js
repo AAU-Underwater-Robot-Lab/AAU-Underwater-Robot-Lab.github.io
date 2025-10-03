@@ -110,7 +110,7 @@ function parsePersonnelItem(item) {
     description,
     heading,
     email,
-    role,
+    //role,
     organizations
   };
 }
@@ -173,7 +173,7 @@ async function loadProjects() {
         // Get project count
         const personLink = person.link.match(/\/en\/persons\/[^/]+/);
         const projectCount = personLink ? (personProjectCount[personLink[0]] || 0) : 0;
-        //const isFormer = projectCount === 0;
+        const isFormer = false; //projectCount === 0;
         const card = document.createElement('a');
         card.className = 'team-card';
         card.href = person.link;
