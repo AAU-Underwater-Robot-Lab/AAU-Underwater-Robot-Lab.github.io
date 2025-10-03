@@ -1,4 +1,4 @@
-const PERSONNEL_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/blue-marine-maritime-research/persons/?format=rss');
+const PERSONNEL_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/underwater-technology/persons/?format=rss');
 
 function normalizeTitleToFilename(title) {
   return title
@@ -28,7 +28,7 @@ async function getProjectPersonLinks() {
     return extractPersonLinksFromProjects(descriptions);
   }
   // Fallback: fetch projects feed directly
-  const PROJECTS_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/multimodal-reasoning-for-robotics-and-process-intelligence/projects/?format=rss');
+  const PROJECTS_FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/underwater-technology/projects/?format=rss');
   try {
     const resp = await fetch(PROJECTS_FEED_URL);
     if (!resp.ok) throw new Error('Network error ' + resp.status);
@@ -143,16 +143,16 @@ async function loadProjects() {
           }
         }
       }
-    }
+    } 
 
     // Only matched team members: link must match a /en/persons/ link in any project description
-    const team = items.filter(item => {
+    /* const team = items.filter(item => {
       const personLink = item.querySelector('link')?.textContent || '';
       // Extract the /en/persons/... part from the link
       const match = personLink.match(/\/en\/persons\/[^/]+/);
       if (!match) return false;
       return projectPersonLinks.has(match[0]);
-    });
+    }); */
 
     // Sort by number of projects (descending)
     team.sort((a, b) => {
