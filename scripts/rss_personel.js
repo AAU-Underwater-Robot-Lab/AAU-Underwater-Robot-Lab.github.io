@@ -146,7 +146,7 @@ async function loadProjects() {
     } 
 
     // Only matched team members: link must match a /en/persons/ link in any project description
-    const team = items;
+    const team = items.reverse();
 
     // Sort by number of projects (descending)
     team.sort((a, b) => {
@@ -173,7 +173,7 @@ async function loadProjects() {
         // Get project count
         const personLink = person.link.match(/\/en\/persons\/[^/]+/);
         const projectCount = personLink ? (personProjectCount[personLink[0]] || 0) : 0;
-        const isFormer = projectCount === 0;
+        //const isFormer = projectCount === 0;
         const card = document.createElement('a');
         card.className = 'team-card';
         card.href = person.link;
