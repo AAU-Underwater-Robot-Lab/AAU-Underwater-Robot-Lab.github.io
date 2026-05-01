@@ -1,14 +1,5 @@
 const FEED_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://vbn.aau.dk/en/organisations/underwater-technology/projects/?format=rss');
 
-// Keywords to filter by (case-insensitive)
-const FILTER_WORDS = ['underwater', 'undervands','ACOMAR','AUV','ROV','eelgrass','acomar'];
-
-function matchesFilter(text) {
-  if (!text) return false;
-  const lower = text.toLowerCase();
-  return FILTER_WORDS.some(w => lower.includes(w));
-}
-
 function normalizeTitleToFilename(title) {
   return title
     .toLowerCase()
@@ -76,11 +67,7 @@ async function loadProjects() {
     const xml = new DOMParser().parseFromString(text, 'application/xml');
     const items = Array.from(xml.querySelectorAll('item'));
 
-    const filtered = items.filter(item => {
-      const title = item.querySelector('title')?.textContent;
-      const desc = item.querySelector('description')?.textContent;
-      return matchesFilter(title) || matchesFilter(desc);
-    });
+    const filtered = items;
 
     // Save filtered project items for use in other scripts, with parsed description
     window.loadedProjectItems = filtered.map(item => {
